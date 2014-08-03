@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<UIProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ProjectDir>D:\dev\weseewe\_ccs\StartupUI</ProjectDir>
+  <Version>1.5.0.0</Version>
+  <Resources>D:\dev\weseewe\_ccs\StartupUI\Resources</Resources>
+  <Name>StartupUI</Name>
+  <JsonFileName>StartupUI.json</JsonFileName>
+  <JsonFolder>D:\dev\weseewe\_ccs\StartupUI\Json</JsonFolder>
+  <JsonList>
+    <string>StartupUI_1.json</string>
+  </JsonList>
+  <CanvasSize>
+    <Width>640</Width>
+    <Height>960</Height>
+  </CanvasSize>
+  <filePath>D:\dev\weseewe\_ccs\StartupUI\StartupUI.xml.ui</filePath>
+  <ProjectType>UIProject</ProjectType>
+  <ResRelativePath />
+  <imageFileList>
+    <string>StartupUI0.plist</string>
+  </imageFileList>
+  <imagePngList>
+    <string>StartupUI0.png</string>
+  </imagePngList>
+  <JsonSuffix>.json</JsonSuffix>
+  <CurrentUIJson>StartupUI_1.json</CurrentUIJson>
+</UIProject>
