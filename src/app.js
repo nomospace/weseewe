@@ -17,7 +17,6 @@ var game_state = {
   end: 3
 };
 
-
 var GameLayer = cc.Layer.extend({
   sprite: null,
   ctor: function() {
@@ -27,6 +26,7 @@ var GameLayer = cc.Layer.extend({
 
     this.initEvents();
     this.initStartUp();
+    this.initPhysics();
     this.bgEffect = cc.audioEngine.playEffect(res.s_music_track);
 
     var blockLayer = new BlockLayer();
@@ -96,7 +96,7 @@ var GameLayer = cc.Layer.extend({
       var name = sender.name;
       if (name == "sound") {
         if (this.isBgEffectPaused) {
-          this.isBgEffectPaused = false
+          this.isBgEffectPaused = false;
           cc.audioEngine.resumeEffect(this.bgEffect);
         } else {
           this.isBgEffectPaused = true;
@@ -107,11 +107,12 @@ var GameLayer = cc.Layer.extend({
       }
     }
   },
+  initPhysics: function() {
+    // Create the initial space
+    this.space = new cp.Space();
+  },
   isSoundOn: function() {
     return !this.isBgEffectPaused;
-  },
-  isSoundOff: function() {
-    return this.isBgEffectPaused;
   },
   getGameState: function() {
     return this.gameState;

@@ -19,9 +19,7 @@
   <imageFileList>
     <string>StartupUI0.plist</string>
   </imageFileList>
-  <imagePngList>
-    <string>StartupUI0.png</string>
-  </imagePngList>
+  <imagePngList />
   <JsonSuffix>.json</JsonSuffix>
-  <CurrentUIJson>StartupUI_1.json</CurrentUIJson>
+  <CurrentUIJson />
 </UIProject>
