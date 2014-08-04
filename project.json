@@ -11,10 +11,13 @@
   "modules": ["cocos2d", "extensions"],
 
   "jsList": [
-    "src/config.js",
-    "src/resource.js",
-    "src/app.js",
-    "src/about.js",
-    "src/cloud.js"
+    "src/Config.js",
+    "src/Resource.js",
+    "src/About.js",
+    "src/Color.js",
+    "src/Block.js",
+    "src/Cloud.js",
+    "src/Player.js",
+    "src/App.js"
   ]
 }

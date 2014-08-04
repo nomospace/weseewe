@@ -1,5 +1,7 @@
 var res = {
   s_cloud_bottom: "res/cloudBottom@2x.png",
+  s_block_top: "res/blockTop@2x.png",
+  s_player_top: "res/playerTop@2x.png",
   s_cloudAnimationJson: "res/animation/animation.ExportJson",
   s_cloudAnimationPlist: "res/animation/animation0.plist",
   s_cloudAnimationPng: "res/animation/animation0.png",
@@ -19,6 +21,8 @@ var res = {
 var g_resources = [
   //image
   res.s_cloud_bottom,
+  res.s_block_top,
+  res.s_player_top,
   //plist
   res.s_cloudAnimationJson,
   res.s_cloudAnimationPlist,

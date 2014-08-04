@@ -1,41 +1,126 @@
 var g_sharedGameLayer;
+var visibleRect = cc.visibleRect;
+var random = function(m, n) {
+  if (m == undefined && n == undefined) {
+    return Math.random();
+  } else {
+    // fixme
+    m = m == undefined ? 1 : m;
+    n = n == undefined ? 1 : n;
+    return Math.random() * (n - m) + m;
+  }
+};
+var game_state = {
+  ready: 0,
+  begin: 1,
+  over: 2,
+  end: 3
+};
+
 
 var GameLayer = cc.Layer.extend({
   sprite: null,
   ctor: function() {
     this._super();
+    this.gameState = game_state.ready;
     g_sharedGameLayer = this;
 
-    this._bgEffect = cc.audioEngine.playEffect(res.s_music_track);
+    this.initEvents();
+    this.initStartUp();
+    this.bgEffect = cc.audioEngine.playEffect(res.s_music_track);
 
-    var ui = ccs.uiReader.widgetFromJsonFile(res.s_startupJson);
-    this.addChild(ui, ZOrder.startup);
-//    ccs.actionManager.playActionByName(res.s_startupShortJson, "In");
+    var blockLayer = new BlockLayer();
+    blockLayer.setPosition(cc.PointZero());
+    blockLayer.moveBlocks(2);
+    this.addChild(blockLayer);
 
-    var soundButton = ccui.helper.seekWidgetByName(ui, "sound");
-    var beginButton = ccui.helper.seekWidgetByName(ui, "begin");
-    beginButton.setTouchEnabled(true);
-    beginButton.addTouchEventListener(this.buttonTouchEvent, this);
-    soundButton.setTouchEnabled(true);
-    soundButton.addTouchEventListener(this.buttonTouchEvent, this);
+    this.player = new Player();
+    this.player.setPosition(cc.p(200, 700));
+    this.addChild(this.player, ZOrder.player);
 
     return true;
   },
-  buttonTouchEvent: function(sender, type) {
+  initEvents: function() {
+    if ('touches' in cc.sys.capabilities) {
+      cc.eventManager.addListener({
+        event: cc.EventListener.TOUCH_ALL_AT_ONCE,
+        onTouchesEnded: function(touches, event) {
+          for (var it = 0; it < touches.length; it++) {
+            var touch = touches[it];
+            if (!touch)
+              break;
+
+            var location = touch.getLocation();
+            console.log(location);
+          }
+        }
+      }, this);
+    } else if ('mouse' in cc.sys.capabilities)
+      cc.eventManager.addListener({
+        event: cc.EventListener.MOUSE,
+        onMouseUp: function(event) {
+          console.log(event.getLocation());
+        }
+      }, this);
+  },
+  initStartUp: function() {
+    var ui = ccs.uiReader.widgetFromJsonFile(res.s_startupJson);
+    this.addChild(ui, ZOrder.startup);
+//    ccs.actionManager.playActionByName(res.s_startupShortJson, "In");
+    var soundButton = ccui.helper.seekWidgetByName(ui, "sound");
+    var beginButton = ccui.helper.seekWidgetByName(ui, "begin");
+    beginButton.setTouchEnabled(true);
+    beginButton.addTouchEventListener(this.startupButtonTouchEvent, this);
+    soundButton.setTouchEnabled(true);
+    soundButton.addTouchEventListener(this.startupButtonTouchEvent, this);
+  },
+  onTouchEnded: function(touches, event) {
+//    if (touches && event) {
+//      for (var it = 0; it < touches.length; it++) {
+//        var touch = touches[it];
+//        if (!touch)
+//          break;
+//
+//        var location = touch.getLocation();
+//        console.log(location);
+//      }
+//    } else {
+//      console.log(touches.getLocation());
+//    }
+    if (this.gameState == game_state.begin) {
+      this.player.jumpAction(true)
+    }
+  },
+  startupButtonTouchEvent: function(sender, type) {
     if (type == ccui.Widget.TOUCH_ENDED) {
       var name = sender.name;
       if (name == "sound") {
-        if (this._isBgEffectPaused) {
-          this._isBgEffectPaused = false
-          cc.audioEngine.resumeEffect(this._bgEffect);
+        if (this.isBgEffectPaused) {
+          this.isBgEffectPaused = false
+          cc.audioEngine.resumeEffect(this.bgEffect);
         } else {
-          this._isBgEffectPaused = true;
-          cc.audioEngine.pauseEffect(this._bgEffect);
+          this.isBgEffectPaused = true;
+          cc.audioEngine.pauseEffect(this.bgEffect);
         }
       } else if (name == "begin") {
 //        ccs.actionManager.playActionByName(res.s_startupShortJson, "Out");
       }
     }
+  },
+  isSoundOn: function() {
+    return !this.isBgEffectPaused;
+  },
+  isSoundOff: function() {
+    return this.isBgEffectPaused;
+  },
+  getGameState: function() {
+    return this.gameState;
+  },
+  setGameState: function(state) {
+    this.gameState = state;
+  },
+  addColorDot: function() {
+
   }
 });
 

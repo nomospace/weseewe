@@ -257,6 +257,10 @@ cc.contentScaleFactor = cc.IS_RETINA_DISPLAY_SUPPORTED ? function () {
     return 1;
 };
 
+cc.PointZero = function () {
+  return cc.p(0, 0);
+};
+
 /**
  * Converts a Point in points to pixels
  * @param {cc.Point} points
