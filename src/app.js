@@ -21,60 +21,41 @@ var GameLayer = cc.Layer.extend({
   sprite: null,
   ctor: function() {
     this._super();
-    this.gameState = game_state.ready;
     g_sharedGameLayer = this;
-
+    this.gameState = game_state.begin;
+    this.bgEffect = cc.audioEngine.playEffect(res.s_music_track);
     this.initEvents();
     this.initStartUp();
     this.initPhysics();
-    this.bgEffect = cc.audioEngine.playEffect(res.s_music_track);
+    this.initPlayer();
+    this.initBlockLayer();
 
-    var blockLayer = new BlockLayer();
-    blockLayer.setPosition(cc.PointZero());
-    blockLayer.moveBlocks(2);
-    this.addChild(blockLayer);
-
-    this.player = new Player();
-    this.player.setPosition(cc.p(200, 700));
-    this.addChild(this.player, ZOrder.player);
+    this.space.addCollisionHandler(1, 1,
+      this.collisionBegin.bind(this),
+      this.collisionPre.bind(this),
+      this.collisionPost.bind(this),
+      this.collisionSeparate.bind(this)
+    );
 
     return true;
+  },
+  onEnter: function() {
+    this._super();
+    this.scheduleUpdate();
   },
   initEvents: function() {
     if ('touches' in cc.sys.capabilities) {
       cc.eventManager.addListener({
         event: cc.EventListener.TOUCH_ALL_AT_ONCE,
-        onTouchesEnded: function(touches, event) {
-          for (var it = 0; it < touches.length; it++) {
-            var touch = touches[it];
-            if (!touch)
-              break;
-
-            var location = touch.getLocation();
-            console.log(location);
-          }
-        }
+        onTouchBegan: this.onTouchBegan.bind(this)
       }, this);
     } else if ('mouse' in cc.sys.capabilities)
       cc.eventManager.addListener({
         event: cc.EventListener.MOUSE,
-        onMouseUp: function(event) {
-          console.log(event.getLocation());
-        }
+        onMouseDown: this.onTouchBegan.bind(this)
       }, this);
   },
-  initStartUp: function() {
-    var ui = ccs.uiReader.widgetFromJsonFile(res.s_startupJson);
-    this.addChild(ui, ZOrder.startup);
-//    ccs.actionManager.playActionByName(res.s_startupShortJson, "In");
-    var soundButton = ccui.helper.seekWidgetByName(ui, "sound");
-    var beginButton = ccui.helper.seekWidgetByName(ui, "begin");
-    beginButton.setTouchEnabled(true);
-    beginButton.addTouchEventListener(this.startupButtonTouchEvent, this);
-    soundButton.setTouchEnabled(true);
-    soundButton.addTouchEventListener(this.startupButtonTouchEvent, this);
-  },
-  onTouchEnded: function(touches, event) {
+  onTouchBegan: function(touches, event) {
 //    if (touches && event) {
 //      for (var it = 0; it < touches.length; it++) {
 //        var touch = touches[it];
@@ -87,9 +68,20 @@ var GameLayer = cc.Layer.extend({
 //    } else {
 //      console.log(touches.getLocation());
 //    }
-    if (this.gameState == game_state.begin) {
-      this.player.jumpAction(true)
-    }
+//    if (this.gameState == game_state.begin) {
+    this.player.jumpAction(true);
+//    }
+  },
+  initStartUp: function() {
+    var ui = ccs.uiReader.widgetFromJsonFile(res.s_startupJson);
+    this.addChild(ui, ZOrder.startup);
+//    ccs.actionManager.playActionByName(res.s_startupShortJson, "In");
+    var soundButton = ccui.helper.seekWidgetByName(ui, "sound");
+    var beginButton = ccui.helper.seekWidgetByName(ui, "begin");
+    beginButton.setTouchEnabled(true);
+    beginButton.addTouchEventListener(this.startupButtonTouchEvent, this);
+    soundButton.setTouchEnabled(true);
+    soundButton.addTouchEventListener(this.startupButtonTouchEvent, this);
   },
   startupButtonTouchEvent: function(sender, type) {
     if (type == ccui.Widget.TOUCH_ENDED) {
@@ -107,9 +99,57 @@ var GameLayer = cc.Layer.extend({
       }
     }
   },
+  initPlayer: function() {
+    this.player = new Player();
+    var size = this.player.getContentSize();
+    // 2. init the runner physic body
+    this.body = new cp.Body(1, cp.momentForBox(1, size.width, size.height));
+    //3. set the position of the runner
+//    this.body.p = cc.p(200, 700);
+    //5. add the created body to space
+    this.space.addBody(this.body);
+    //6. create the shape for the body
+    this.shape = new cp.BoxShape(this.body, size.width, size.height);
+    //7. add shape to space
+    this.space.addShape(this.shape);
+    this.shape.setCollisionType(1);
+    //8. set body to the physic sprite
+    this.player.setBody(this.body);
+    this.player.setPosition(cc.p(200, 700));
+    this.addChild(this.player, ZOrder.player);
+  },
   initPhysics: function() {
     // Create the initial space
     this.space = new cp.Space();
+    this.space.gravity = cp.v(0, -200);
+  },
+  initBlockLayer: function() {
+    this.blockLayer = new BlockLayer();
+    this.blockLayer.setPosition(cc.PointZero());
+    this.blockLayer.moveBlocks(2);
+    this.addChild(this.blockLayer);
+  },
+  update: function(delta) {
+    this.space.step(delta);
+  },
+  collisionBegin: function(arbiter, space) {
+    cc.log('collision begin');
+    var shapes = arbiter.getShapes();
+    var collTypeA = shapes[0].collision_type;
+    var collTypeB = shapes[1].collision_type;
+    cc.log('Collision Type A:' + collTypeA);
+    cc.log('Collision Type B:' + collTypeB);
+    return true;
+  },
+  collisionPre: function(arbiter, space) {
+    cc.log('collision pre');
+    return true;
+  },
+  collisionPost: function(arbiter, space) {
+    cc.log('collision post');
+  },
+  collisionSeparate: function(arbiter, space) {
+    cc.log('collision separate');
   },
   isSoundOn: function() {
     return !this.isBgEffectPaused;

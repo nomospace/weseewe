@@ -1,4 +1,6 @@
-var block_layer_tag = 61;
+var block_layer_tag = 102;
+var grabable_mask_bit = 1<<31;
+var not_grabable_mask = ~grabable_mask_bit;
 
 var BlockLayer = cc.Layer.extend({
   ctor: function() {
@@ -10,7 +12,7 @@ var BlockLayer = cc.Layer.extend({
     this.colorIndex = 0;
 
     var color = Color.random();
-    this.initBlocks();
+    this.initBlocksAttr();
     var blockAttr = {color: color, y: 0, allow: true};
     var firstBlock = this.addBlock(blockAttr, cc.PointZero());
     this.blocks.push(firstBlock);
@@ -23,7 +25,7 @@ var BlockLayer = cc.Layer.extend({
 
     return this;
   },
-  initBlocks: function() {
+  initBlocksAttr: function() {
     for (var i = 0; i < 10; i++) {
       for (var j = 0; j < 15; j++) {
         var color, allow, y = 0, colors = Color.colors;
@@ -33,8 +35,8 @@ var BlockLayer = cc.Layer.extend({
           allow = true;
         }
         else {
-          var b1 = this.blocksAttr[blockIndex - 2].allow;
-          var b2 = this.blocksAttr[blockIndex - 1].allow;
+          var b1 = this.blocksAttr[blockIndex - 2]._allow;
+          var b2 = this.blocksAttr[blockIndex - 1]._allow;
           if (!b1 && !b2) {
             allow = true;
           } else if (b1 && b2) {
@@ -58,19 +60,36 @@ var BlockLayer = cc.Layer.extend({
   },
   addBlock: function(blockAttr, point) {
     var block = new Block();
-    var blockSize = block.getContentSize();
-    block.attr({x: point.x + blockSize.width / 2, y: point.y});
+    var size = block.getContentSize();
+//    console.log(size, point);
+//    console.log(point.x, size.height, point.x + size.width / 2);
+//    if (block._allow) {
+    var body = new cp.Body(1, cp.momentForBox(1, size.width, size.height));
+    var space = g_sharedGameLayer.space;
+//    space.addBody(body);
+//    var shape = new cp.BoxShape(body, size.width, size.height);
+//    shape.setElasticity(0.5);
+//    shape.setFriction(0.5);
+//    shape.setCollisionType(1);
+//    space.addShape(shape);
+    block.setBody(body);
+    var staticShape = new cp.SegmentShape(space.staticBody,
+      cp.v(point.x, size.height / 2), cp.v(point.x + size.width, size.height / 2), 0);
+    staticShape.setElasticity(0);
+    staticShape.setFriction(0);
+    staticShape.setCollisionType(1);
+    space.addStaticShape(staticShape);
+//    }
+    block.setPosition(cc.p(point.x + size.width / 2, point.y));
     block.setAttr(blockAttr);
-    if (block.attr.allow) {
-
-    }
     this.addChild(block);
     return block;
   },
   addTailBlock: function(blockAttr) {
     var tailPoint = this.lastBlock.getPosition();
-    var blockSize = this.lastBlock.getContentSize();
-    var block = this.addBlock(blockAttr, cc.p(tailPoint.x + blockSize.width / 2, blockAttr.y))
+    var size = this.lastBlock.getContentSize();
+    cc.log(blockAttr.y);
+    var block = this.addBlock(blockAttr, cc.p(tailPoint.x + size.width / 2, blockAttr.y));
     this.blocks.push(block);
     this.lastBlock = this.blocks[this.blocks.length - 1];
     return block;
@@ -78,13 +97,9 @@ var BlockLayer = cc.Layer.extend({
   moveBlocks: function(duration) {
     this._moveActionTag = 30;
     this.stopActionByTag(this._moveActionTag);
-    var self = this;
     var moveAction = cc.moveBy(duration, cc.p(-204, 0));
-
     var repeatForever = cc.repeatForever(
-      cc.sequence(moveAction, cc.callFunc(function() {
-        self.moveBlocksDone();
-      })));
+      cc.sequence(moveAction, cc.callFunc(this.moveBlocksDone.bind(this))));
     repeatForever.setTag(this._moveActionTag);
     this.runAction(repeatForever);
   },
@@ -123,17 +138,14 @@ var BlockLayer = cc.Layer.extend({
   }
 });
 
-
-var Block = cc.Sprite.extend({
+var Block = cc.PhysicsSprite.extend({
   ctor: function() {
     this._super(res.s_block_top, cc.rect(26, 30, 204, 482));
-    return this;
   },
   setAttr: function(attr) {
-    this.y = attr.y;
-    this.color = attr.color;
-    this.allow = attr.allow;
-    this.setColor(this.color);
-    cc.log(attr);
+    this._y = attr.y;
+    this._color = attr.color;
+    this._allow = attr.allow;
+    this.setColor(this._color);
   }
 });

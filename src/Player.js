@@ -6,14 +6,15 @@ var player_state = {
   jumpback: 4,
   down: 5
 };
+var player_tag = 101;
 
-var Player = cc.Sprite.extend({
+var Player = cc.PhysicsSprite.extend({
   ctor: function() {
     this._super(res.s_player_top, cc.rect(8, 8, 60, 60));
-    this.playerState = player_state.unknow;
-    this.playerState2 = player_state.unknow;
+    this.playerState = player_state.walk;
+    this.playerState2 = player_state.walk;
+    this.setTag(player_tag);
     this.jumpCnt = 0;
-    return this;
   },
   downAction: function() {
     if (this.playerState == player_state.jump || this.playerState == player_state.jumpback) {
@@ -28,7 +29,8 @@ var Player = cc.Sprite.extend({
     }
   },
   rotateAction: function() {
-    var action = cc.repeatForever(cc.rotateBy(0.8, 360));
+    cc.log("rotate");
+    var action = cc.repeatForever(cc.rotateBy(2, 360));
     action.setTag(11);
     this.runAction(action);
   },
@@ -55,35 +57,34 @@ var Player = cc.Sprite.extend({
     }
   },
   jumpAction: function(touchBegin) {
-    if (this.jumpCnt == 0 && this.playerState != player_state.walk) {
-      return false;
-    }
+    /*    if (this.jumpCnt == 0 && this.playerState != player_state.walk) {
+     return false;
+     }
 
-    if (this.jumpCnt >= 2) {
-      return false;
-    }
+     if (this.jumpCnt >= 2) {
+     return false;
+     }
 
-    if (!touchBegin) {
-      if (this.playerState == player_state.jump) {
-        this.jumpAction.change();
-      }
-      return false;
-    }
+     if (!touchBegin) {
+     if (this.playerState == player_state.jump) {
+     this.jumpAction.change();
+     }
+     return false;
+     }
 
-    if (this.playerState == player_state.jump
-      || this.playerState == player_state.jumpback) {
-      this.stopActionByTag(11);
-      this.stopActionByTag(12);
-      this.stopActionByTag(13);
-    }
-    this.jumpCnt++;
+     if (this.playerState == player_state.jump
+     || this.playerState == player_state.jumpback) {
+     this.stopActionByTag(11);
+     this.stopActionByTag(12);
+     this.stopActionByTag(13);
+     }
+     this.jumpCnt++;*/
     this.playerState = player_state.jump;
 
     this.rotateAction();
-    this.playerJump = new PlayerJump(240 / 80 / 10, cc.p(0, 240), 60, 1);
     var seqAction = cc.sequence(
-      this.playerJump,
-      cc.callFunc(this.jumpDoneAction));
+      cc.jumpBy(1, cc.p(0, 1), 200, 1),
+      cc.callFunc(this.jumpDoneAction.bind(this)));
     seqAction.setTag(12);
     this.runAction(seqAction);
 
@@ -97,20 +98,19 @@ var Player = cc.Sprite.extend({
     return true;
   },
   jumpDoneAction: function() {
-    this.playerJump.retain();
-    var pos = g_sharedGameLayer.convertToWorldSpace(this.getPosition());
-    var height = pos.y + 100;
-    var downAction = cc.moveBy(height / 130 / 10, cc.p(0, -height));
-    var easingAction = downAction.easing(cc.easeSineIn());
-    easingAction.setTag(13);
-    this.runAction(easingAction);
+//    var pos = g_sharedGameLayer.convertToWorldSpace(this.getPosition());
+//    var height = pos.y + 100;
+//    var downAction = cc.moveBy(height / 130 / 10, cc.p(0, -height));
+//    var easingAction = downAction.easing(cc.easeSineIn());
+//    easingAction.setTag(13);
+//    this.runAction(easingAction);
     this.playerState = player_state.jumpback;
   }
 });
 
 var PlayerJump = cc.JumpBy.extend({
   ctor: function() {
-    this._super.call(arguments)
+    this._super(arguments)
   },
   change: function() {
   }
