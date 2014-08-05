@@ -1,5 +1,5 @@
 var block_layer_tag = 102;
-var grabable_mask_bit = 1<<31;
+var grabable_mask_bit = 1 << 31;
 var not_grabable_mask = ~grabable_mask_bit;
 
 var BlockLayer = cc.Layer.extend({
@@ -33,8 +33,7 @@ var BlockLayer = cc.Layer.extend({
         if (blockIndex < 2) {
           color = colors[0];
           allow = true;
-        }
-        else {
+        } else {
           var b1 = this.blocksAttr[blockIndex - 2]._allow;
           var b2 = this.blocksAttr[blockIndex - 1]._allow;
           if (!b1 && !b2) {
@@ -73,12 +72,19 @@ var BlockLayer = cc.Layer.extend({
 //    shape.setCollisionType(1);
 //    space.addShape(shape);
     block.setBody(body);
-    var staticShape = new cp.SegmentShape(space.staticBody,
-      cp.v(point.x, size.height / 2), cp.v(point.x + size.width, size.height / 2), 0);
-    staticShape.setElasticity(0);
-    staticShape.setFriction(0);
-    staticShape.setCollisionType(1);
-    space.addStaticShape(staticShape);
+    var staticBody = space.staticBody;
+    console.log(point, "point")
+    var borders = [ new cp.SegmentShape(staticBody, cp.v(point.x, point.y + size.height / 2), cp.v(point.x + size.width, point.y + size.height / 2), 0),	// top
+      new cp.SegmentShape(staticBody, cp.v(point.x, 0), cp.v(point.x, point.y + size.height / 2), 0),				// left
+      new cp.SegmentShape(staticBody, cp.v(point.x + size.width, 0), cp.v(point.x + size.width, point.y + size.height / 2), 0)				// right
+    ];
+    for (var i = 0; i < borders.length; i++) {
+      var border = borders[i];
+      border.setElasticity(1);
+      border.setFriction(1);
+      border.setCollisionType(1);
+      space.addStaticShape(border);
+    }
 //    }
     block.setPosition(cc.p(point.x + size.width / 2, point.y));
     block.setAttr(blockAttr);
@@ -98,8 +104,7 @@ var BlockLayer = cc.Layer.extend({
     this._moveActionTag = 30;
     this.stopActionByTag(this._moveActionTag);
     var moveAction = cc.moveBy(duration, cc.p(-204, 0));
-    var repeatForever = cc.repeatForever(
-      cc.sequence(moveAction, cc.callFunc(this.moveBlocksDone.bind(this))));
+    var repeatForever = cc.repeatForever(cc.sequence(moveAction, cc.callFunc(this.moveBlocksDone.bind(this))));
     repeatForever.setTag(this._moveActionTag);
     this.runAction(repeatForever);
   },

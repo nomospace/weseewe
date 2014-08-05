@@ -142,14 +142,14 @@ var GameLayer = cc.Layer.extend({
     return true;
   },
   collisionPre: function(arbiter, space) {
-    cc.log('collision pre');
+//    cc.log('collision pre');
     return true;
   },
   collisionPost: function(arbiter, space) {
-    cc.log('collision post');
+//    cc.log('collision post');
   },
   collisionSeparate: function(arbiter, space) {
-    cc.log('collision separate');
+//    cc.log('collision separate');
   },
   isSoundOn: function() {
     return !this.isBgEffectPaused;
