@@ -60,10 +60,11 @@ var BlockLayer = cc.Layer.extend({
   addBlock: function(blockAttr, point) {
     var block = new Block();
     var size = block.getContentSize();
+    var width = size.width, height = size.height;
 //    console.log(size, point);
 //    console.log(point.x, size.height, point.x + size.width / 2);
 //    if (block._allow) {
-    var body = new cp.Body(1, cp.momentForBox(1, size.width, size.height));
+    var body = new cp.Body(1, cp.momentForBox(1, width, height));
     var space = g_sharedGameLayer.space;
 //    space.addBody(body);
 //    var shape = new cp.BoxShape(body, size.width, size.height);
@@ -73,15 +74,15 @@ var BlockLayer = cc.Layer.extend({
 //    space.addShape(shape);
     block.setBody(body);
     var staticBody = space.staticBody;
-    console.log(point, "point")
-    var borders = [ new cp.SegmentShape(staticBody, cp.v(point.x, point.y + size.height / 2), cp.v(point.x + size.width, point.y + size.height / 2), 0),	// top
-      new cp.SegmentShape(staticBody, cp.v(point.x, 0), cp.v(point.x, point.y + size.height / 2), 0),				// left
-      new cp.SegmentShape(staticBody, cp.v(point.x + size.width, 0), cp.v(point.x + size.width, point.y + size.height / 2), 0)				// right
+    console.log(point, "point");
+    var borders = [ new cp.SegmentShape(staticBody, cp.v(point.x - width / 2, point.y + height / 2), cp.v(point.x + width / 2, point.y + height / 2), 0),	// top
+      new cp.SegmentShape(staticBody, cp.v(point.x - width / 2, 0), cp.v(point.x - width / 2, point.y + height / 2), 0),				// left
+      new cp.SegmentShape(staticBody, cp.v(point.x + width / 2, 0), cp.v(point.x + width / 2, point.y + height / 2), 0)				// right
     ];
     for (var i = 0; i < borders.length; i++) {
       var border = borders[i];
-      border.setElasticity(1);
-      border.setFriction(1);
+      border.setElasticity(0);
+      border.setFriction(0);
       border.setCollisionType(1);
       space.addStaticShape(border);
     }

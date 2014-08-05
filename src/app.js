@@ -110,9 +110,9 @@ var GameLayer = cc.Layer.extend({
     this.space.addBody(this.body);
     //6. create the shape for the body
     this.shape = new cp.BoxShape(this.body, size.width, size.height);
+    this.shape.setCollisionType(1);
     //7. add shape to space
     this.space.addShape(this.shape);
-    this.shape.setCollisionType(1);
     //8. set body to the physic sprite
     this.player.setBody(this.body);
     this.player.setPosition(cc.p(200, 700));
