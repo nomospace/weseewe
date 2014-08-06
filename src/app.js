@@ -30,7 +30,7 @@ var GameLayer = cc.Layer.extend({
     this.initPlayer();
     this.initBlockLayer();
 
-    this.space.addCollisionHandler(1, 1,
+    this.space.addCollisionHandler(SpriteTag.player, SpriteTag.block,
       this.collisionBegin.bind(this),
       this.collisionPre.bind(this),
       this.collisionPost.bind(this),
@@ -69,7 +69,7 @@ var GameLayer = cc.Layer.extend({
 //      console.log(touches.getLocation());
 //    }
 //    if (this.gameState == game_state.begin) {
-    this.player.jumpAction(true);
+    this.player.jumpUpAction(true);
 //    }
   },
   initStartUp: function() {
@@ -100,31 +100,20 @@ var GameLayer = cc.Layer.extend({
     }
   },
   initPlayer: function() {
-    this.player = new Player();
-    var size = this.player.getContentSize();
-    // 2. init the runner physic body
-    this.body = new cp.Body(1, cp.momentForBox(1, size.width, size.height));
-    //3. set the position of the runner
-//    this.body.p = cc.p(200, 700);
-    //5. add the created body to space
-    this.space.addBody(this.body);
-    //6. create the shape for the body
-    this.shape = new cp.BoxShape(this.body, size.width, size.height);
-    this.shape.setCollisionType(1);
-    //7. add shape to space
-    this.space.addShape(this.shape);
-    //8. set body to the physic sprite
-    this.player.setBody(this.body);
-    this.player.setPosition(cc.p(200, 700));
+    this.player = new Player(this);
     this.addChild(this.player, ZOrder.player);
   },
   initPhysics: function() {
-    // Create the initial space
     this.space = new cp.Space();
-    this.space.gravity = cp.v(0, -200);
+    this.space.gravity = cp.v(0, -1000);
+    var wallBottom = new cp.SegmentShape(this.space.staticBody,
+      cp.v(0, 0),// start point
+      cp.v(4294967295, 0),// MAX INT:4294967295
+      0);// thickness of wall
+    this.space.addStaticShape(wallBottom);
   },
   initBlockLayer: function() {
-    this.blockLayer = new BlockLayer();
+    this.blockLayer = new BlockLayer(this);
     this.blockLayer.setPosition(cc.PointZero());
     this.blockLayer.moveBlocks(2);
     this.addChild(this.blockLayer);

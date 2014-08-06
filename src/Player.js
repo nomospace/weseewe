@@ -9,19 +9,35 @@ var player_state = {
 var player_tag = 101;
 
 var Player = cc.PhysicsSprite.extend({
-  ctor: function() {
+  ctor: function(parent) {
     this._super(res.s_player_top, cc.rect(8, 8, 60, 60));
     this.playerState = player_state.walk;
     this.playerState2 = player_state.walk;
-    this.setTag(player_tag);
     this.jumpCnt = 0;
+    this.playerSize = this.getContentSize();
+    this.gameLayer = parent;
+    this.setTag(player_tag);
+    this.initBody();
+    this.initShape();
+    this.scheduleUpdate();
+  },
+  initBody: function() {
+    this.body = new cp.Body(1, cp.momentForBox(1, this.playerSize.width, this.playerSize.height));
+    this.body.p = cc.p(200, 700);
+    this.gameLayer.space.addBody(this.body);
+    this.setBody(this.body);
+  },
+  initShape: function() {
+    this.shape = new cp.BoxShape(this.body, this.playerSize.width, this.playerSize.height);
+    this.shape.setCollisionType(SpriteTag.player);
+    this.gameLayer.space.addShape(this.shape);
   },
   downAction: function() {
     if (this.playerState == player_state.jump || this.playerState == player_state.jumpback) {
       return;
     }
     if (this.playerState != player_state.down) {
-      var point = g_sharedGameLayer.convertToWorldSpace(this.getPosition());
+      var point = this.getParent().convertToWorldSpace(this.getPosition());
       var height = point.y + 70;
       var moveAction = cc.moveBy(height / 80 / 10, cc.p(0, -height));
       this.runAction(moveAction.easing(cc.easeSineIn()));
@@ -30,7 +46,7 @@ var Player = cc.PhysicsSprite.extend({
   },
   rotateAction: function() {
     cc.log("rotate");
-    var action = cc.repeatForever(cc.rotateBy(2, 360));
+    var action = cc.repeatForever(cc.rotateBy(1, 360));
     action.setTag(11);
     this.runAction(action);
   },
@@ -56,7 +72,7 @@ var Player = cc.PhysicsSprite.extend({
       this.playerState2 = player_state.back;
     }
   },
-  jumpAction: function(touchBegin) {
+  jumpUpAction: function(touchBegin) {
     /*    if (this.jumpCnt == 0 && this.playerState != player_state.walk) {
      return false;
      }
@@ -67,7 +83,7 @@ var Player = cc.PhysicsSprite.extend({
 
      if (!touchBegin) {
      if (this.playerState == player_state.jump) {
-     this.jumpAction.change();
+     this.jumpUpAction.change();
      }
      return false;
      }
@@ -82,13 +98,14 @@ var Player = cc.PhysicsSprite.extend({
     this.playerState = player_state.jump;
 
     this.rotateAction();
-    var seqAction = cc.sequence(
-      cc.jumpBy(1, cc.p(0, 1), 200, 1),
-      cc.callFunc(this.jumpDoneAction.bind(this)));
-    seqAction.setTag(12);
-    this.runAction(seqAction);
+    this.body.applyImpulse(cp.v(0, 500), cp.v(0, 0));
+//    var seqAction = cc.sequence(
+//      cc.jumpBy(1, cc.p(0, 1), 200, 1),
+//      cc.callFunc(this.jumpDoneAction.bind(this)));
+//    seqAction.setTag(12);
+//    this.runAction(seqAction);
 
-    if (g_sharedGameLayer.isSoundOn()) {
+    if (this.gameLayer.isSoundOn()) {
       if (this.jumpCnt == 1) {
         cc.audioEngine.playEffect(res.s_music_jumpA);
       } else if (this.jumpCnt == 2) {
@@ -105,13 +122,9 @@ var Player = cc.PhysicsSprite.extend({
 //    easingAction.setTag(13);
 //    this.runAction(easingAction);
     this.playerState = player_state.jumpback;
-  }
-});
-
-var PlayerJump = cc.JumpBy.extend({
-  ctor: function() {
-    this._super(arguments)
   },
-  change: function() {
+  update: function(dt) {
+    var vel = this.body.getVel();
+    console.log("vel.y", vel.y)
   }
 });

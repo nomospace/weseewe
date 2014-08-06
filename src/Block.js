@@ -3,18 +3,19 @@ var grabable_mask_bit = 1 << 31;
 var not_grabable_mask = ~grabable_mask_bit;
 
 var BlockLayer = cc.Layer.extend({
-  ctor: function() {
+  ctor: function(parent) {
     this._super();
     this.setTag(block_layer_tag);
     this.blocks = [];
     this.blocksAttr = [];
     this.blockIndex = 0;
     this.colorIndex = 0;
+    this.gameLayer = parent;
 
     var color = Color.random();
     this.initBlocksAttr();
     var blockAttr = {color: color, y: 0, allow: true};
-    var firstBlock = this.addBlock(blockAttr, cc.PointZero());
+    var firstBlock = this.addBlock(blockAttr, cc.PointZero(), this.gameLayer.space);
     this.blocks.push(firstBlock);
     var tailPoint;
     this.lastBlock = this.blocks[this.blocks.length - 1];
@@ -57,38 +58,8 @@ var BlockLayer = cc.Layer.extend({
       }
     }
   },
-  addBlock: function(blockAttr, point) {
-    var block = new Block();
-    var size = block.getContentSize();
-    var width = size.width, height = size.height;
-//    console.log(size, point);
-//    console.log(point.x, size.height, point.x + size.width / 2);
-//    if (block._allow) {
-    var body = new cp.Body(1, cp.momentForBox(1, width, height));
-    var space = g_sharedGameLayer.space;
-//    space.addBody(body);
-//    var shape = new cp.BoxShape(body, size.width, size.height);
-//    shape.setElasticity(0.5);
-//    shape.setFriction(0.5);
-//    shape.setCollisionType(1);
-//    space.addShape(shape);
-    block.setBody(body);
-    var staticBody = space.staticBody;
-    console.log(point, "point");
-    var borders = [ new cp.SegmentShape(staticBody, cp.v(point.x - width / 2, point.y + height / 2), cp.v(point.x + width / 2, point.y + height / 2), 0),	// top
-      new cp.SegmentShape(staticBody, cp.v(point.x - width / 2, 0), cp.v(point.x - width / 2, point.y + height / 2), 0),				// left
-      new cp.SegmentShape(staticBody, cp.v(point.x + width / 2, 0), cp.v(point.x + width / 2, point.y + height / 2), 0)				// right
-    ];
-    for (var i = 0; i < borders.length; i++) {
-      var border = borders[i];
-      border.setElasticity(0);
-      border.setFriction(0);
-      border.setCollisionType(1);
-      space.addStaticShape(border);
-    }
-//    }
-    block.setPosition(cc.p(point.x + size.width / 2, point.y));
-    block.setAttr(blockAttr);
+  addBlock: function(attr, point, space) {
+    var block = new Block(attr, point, space);
     this.addChild(block);
     return block;
   },
@@ -96,7 +67,7 @@ var BlockLayer = cc.Layer.extend({
     var tailPoint = this.lastBlock.getPosition();
     var size = this.lastBlock.getContentSize();
     cc.log(blockAttr.y);
-    var block = this.addBlock(blockAttr, cc.p(tailPoint.x + size.width / 2, blockAttr.y));
+    var block = this.addBlock(blockAttr, cc.p(tailPoint.x + size.width / 2, blockAttr.y), this.gameLayer.space);
     this.blocks.push(block);
     this.lastBlock = this.blocks[this.blocks.length - 1];
     return block;
@@ -110,7 +81,7 @@ var BlockLayer = cc.Layer.extend({
     this.runAction(repeatForever);
   },
   moveBlocksDone: function(block) {
-    var state = g_sharedGameLayer.getGameState();
+    var state = this.gameLayer.getGameState();
     if (state == game_state.ready) {
       this.addTailBlock(this.blocksAttr[0]);
     } else if (state == game_state.begin) {
@@ -119,7 +90,7 @@ var BlockLayer = cc.Layer.extend({
         this.colorIndex++;
         this.addColorDot();
       } else {
-        g_sharedGameLayer.setGameState(game_state.end);
+        this.gameLayer.setGameState(game_state.end);
       }
     } else if (state == game_state.end) {
 
@@ -140,13 +111,32 @@ var BlockLayer = cc.Layer.extend({
     }
   },
   addColorDot: function() {
-    g_sharedGameLayer.addColorDot(Color.colors[this.colorIndex]);
+    this.gameLayer.addColorDot(Color.colors[this.colorIndex]);
   }
 });
 
 var Block = cc.PhysicsSprite.extend({
-  ctor: function() {
+  ctor: function(attr, point, space) {
     this._super(res.s_block_top, cc.rect(26, 30, 204, 482));
+    this.space = space;
+    this.blockSize = this.getContentSize();
+    this.initBody(attr, point);
+    this.initShape();
+    this.setAttr(attr);
+    this.setPosition(cc.p(point.x + this.blockSize.width / 2, point.y));
+  },
+  initBody: function(attr, point) {
+    console.log(point, "point");
+    this.body = new cp.StaticBody();
+    body.setPos(point);
+    this.setBody(this.body);
+  },
+  initShape: function() {
+    this.shape = new cp.BoxShape(this.body, this.blockSize.width, this.blockSize.height);
+    this.shape.setCollisionType(SpriteTag.block);
+    this.shape.setSensor(true);
+    this.space.addStaticShape(this.shape);
+//    this.body.setUserData(this);
   },
   setAttr: function(attr) {
     this._y = attr.y;
