@@ -104,10 +104,6 @@ var BlockLayer = cc.Layer.extend({
       var point = this.convertToWorldSpace(block.getPosition());
       var size = block.getContentSize();
       if (point.x < -size.width) {
-//        this.space.removeShape(block.shape);
-//        this.space.removeBody(block.body);
-//        this.space.removeStaticShape(block.shape);
-        console.log("cleanupFirstBlock")
         this.removeChild(block);
         this.blocks.shift();
       } else {
@@ -122,9 +118,7 @@ var BlockLayer = cc.Layer.extend({
     var offsetPos = cc.pSub(cc.p(x, y), this.getPosition());
     for (var i = 0; i < this.blocks.length; i++) {
       var block = this.blocks[i];
-//      block.body.setPos(cc.pAdd(block.getPosition(), offsetPos));
       block.setPosition(cc.pAdd(block.getPosition(), offsetPos));
-//      block.body.setPos(block.getPosition());
     }
   }
 });
@@ -142,18 +136,17 @@ var Block = cc.PhysicsSprite.extend({
   },
   initBody: function(attr, point) {
 //    this.body = new cp.StaticBody();
-    this.body = new cp.Body(1, cp.momentForBox(1, this.blockSize.width, this.blockSize.height));
-    this.body.setPos(cc.p(point.x + this.blockSize.width / 2,
-      point.y + this.blockSize.height / 2));
+    this.body = new cp.Body(Max, cp.momentForBox(Max, this.blockSize.width, this.blockSize.height));
+    this.body.setPos(cc.p(point.x + this.blockSize.width / 2, point.y + this.blockSize.height / 2));
 //    this.body.setVel({x: -200, y: 0});
-    this.space.addBody(this.body);
+//    this.space.addBody(this.body);
     this.setBody(this.body);
   },
   initShape: function() {
     this.shape = new cp.BoxShape(this.body, this.blockSize.width, this.blockSize.height);
     this.shape.setCollisionType(SpriteTag.block);
-    this.shape.setElasticity(1);
-    this.shape.setFriction(1);
+    this.shape.setElasticity(0);
+    this.shape.setFriction(0);
 //    this.shape.setSensor(true);
     this.space.addShape(this.shape);
   },

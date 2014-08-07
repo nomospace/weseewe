@@ -1,4 +1,4 @@
-var PhysicsDebug = false;
+var PhysicsDebug = true;
 var Max = 4294967295;
 
 var ZOrder = {

@@ -23,7 +23,7 @@ var GameLayer = cc.Layer.extend({
     this._super();
     g_sharedGameLayer = this;
     this.gameState = game_state.begin;
-    this.bgEffect = cc.audioEngine.playEffect(res.s_music_track);
+//    this.bgEffect = cc.audioEngine.playEffect(res.s_music_track);
     this.initEvents();
     this.initStartUp();
     this.initPhysics();
@@ -31,12 +31,11 @@ var GameLayer = cc.Layer.extend({
     this.initBlockLayer();
     this.setupDebugNode();
 
-    this.space.addCollisionHandler(SpriteTag.player, SpriteTag.block,
-      this.collisionBegin.bind(this),
-      this.collisionPre.bind(this),
-      this.collisionPost.bind(this),
-      this.collisionSeparate.bind(this)
-    );
+    var beginHandler = this.collisionBegin.bind(this);
+    var preHandler = this.collisionPre.bind(this);
+    var postHandler = this.collisionPost.bind(this);
+    var separateHandler = this.collisionSeparate.bind(this);
+    this.space.addCollisionHandler(SpriteTag.player, SpriteTag.block, beginHandler, preHandler, postHandler, separateHandler);
 
     return true;
   },
@@ -107,12 +106,11 @@ var GameLayer = cc.Layer.extend({
   initPhysics: function() {
     this.space = new cp.Space();
     this.space.gravity = cp.v(0, -1000);
-    var wallBottom = new cp.SegmentShape(this.space.staticBody,
-      cp.v(-Max, 0),// start point
+    var wallBottom = new cp.SegmentShape(this.space.staticBody, cp.v(-Max, 0),// start point
       cp.v(Max, 0),// MAX INT:4294967295
       0);// thickness of wall
     wallBottom.setFriction(0);
-    this.space.addStaticShape(wallBottom);
+    this.space.addShape(wallBottom);
   },
   initBlockLayer: function() {
     this.blockLayer = new BlockLayer(this);
@@ -128,12 +126,15 @@ var GameLayer = cc.Layer.extend({
     }
   },
   collisionBegin: function(arbiter, space) {
-    this.player.setRotation(0);
+    console.log("begin");
     var shapes = arbiter.getShapes();
     cc.each(shapes, function(shape) {
 //      shape.body.setRotation(0);
       shape.body.setVel({x: 0, y: 0});
     });
+    this.player.setRotation(0);
+    this.player.setPlayerState(player_state);
+    this.player.walkAction();
 //    var collTypeA = shapes[0].collision_type;
 //    var collTypeB = shapes[1].collision_type;
 //    console.log('Collision Type A:' + collTypeA);
@@ -148,7 +149,7 @@ var GameLayer = cc.Layer.extend({
 //    console.log('collision post');
   },
   collisionSeparate: function(arbiter, space) {
-//    console.log('collision separate');
+    console.log('collision separate');
   },
   isSoundOn: function() {
     return !this.isBgEffectPaused;
@@ -168,6 +169,11 @@ var GameLayer = cc.Layer.extend({
       this._debugNode.visible = true;
       this.addChild(this._debugNode);
     }
+  },
+  setPosition: function(x, y) {
+    var offsetPos = cc.pSub(cc.p(x, y), this.getPosition());
+    this.player.setPosition(cc.pAdd(this.player.getPosition(), offsetPos));
+    this.blockLayer.setPosition(cc.pAdd(this.blockLayer.getPosition(), offsetPos));
   }
 });
 
