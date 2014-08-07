@@ -11,6 +11,7 @@ var BlockLayer = cc.Layer.extend({
     this.blockIndex = 0;
     this.colorIndex = 0;
     this.gameLayer = parent;
+    this.space = this.gameLayer.space;
 
     var color = Color.random();
     this.initBlocksAttr();
@@ -51,7 +52,7 @@ var BlockLayer = cc.Layer.extend({
             color = colors[random(i + 1, colors.length - 1)];
           }
 
-          y = random(-120, 120);
+//          y = random(-120, 120);
         }
 
         this.blocksAttr.push({y: y, color: color, allow: allow});
@@ -66,7 +67,6 @@ var BlockLayer = cc.Layer.extend({
   addTailBlock: function(blockAttr) {
     var tailPoint = this.lastBlock.getPosition();
     var size = this.lastBlock.getContentSize();
-    cc.log(blockAttr.y);
     var block = this.addBlock(blockAttr, cc.p(tailPoint.x + size.width / 2, blockAttr.y), this.gameLayer.space);
     this.blocks.push(block);
     this.lastBlock = this.blocks[this.blocks.length - 1];
@@ -100,10 +100,15 @@ var BlockLayer = cc.Layer.extend({
   cleanupFirstBlock: function() {
     var count = this.blocks.length;
     for (var i = 0; i < count - 1; i++) {
-      var point = this.convertToWorldSpace(this.blocks[i].getPosition());
-      var size = this.blocks[i].getContentSize();
+      var block = this.blocks[i];
+      var point = this.convertToWorldSpace(block.getPosition());
+      var size = block.getContentSize();
       if (point.x < -size.width) {
-        this.removeChild(this.blocks[i]);
+//        this.space.removeShape(block.shape);
+//        this.space.removeBody(block.body);
+//        this.space.removeStaticShape(block.shape);
+        console.log("cleanupFirstBlock")
+        this.removeChild(block);
         this.blocks.shift();
       } else {
         break;
@@ -112,31 +117,45 @@ var BlockLayer = cc.Layer.extend({
   },
   addColorDot: function() {
     this.gameLayer.addColorDot(Color.colors[this.colorIndex]);
+  },
+  setPosition: function(x, y) {
+    var offsetPos = cc.pSub(cc.p(x, y), this.getPosition());
+    for (var i = 0; i < this.blocks.length; i++) {
+      var block = this.blocks[i];
+//      block.body.setPos(cc.pAdd(block.getPosition(), offsetPos));
+      block.setPosition(cc.pAdd(block.getPosition(), offsetPos));
+//      block.body.setPos(block.getPosition());
+    }
   }
 });
 
 var Block = cc.PhysicsSprite.extend({
   ctor: function(attr, point, space) {
-    this._super(res.s_block_top, cc.rect(26, 30, 204, 482));
+    var magic = 120;
+    this._super(res.s_block_top, cc.rect(26, 30, 204, random(magic, 482)));
     this.space = space;
     this.blockSize = this.getContentSize();
     this.initBody(attr, point);
     this.initShape();
-    this.setAttr(attr);
-    this.setPosition(cc.p(point.x + this.blockSize.width / 2, point.y));
+    attr && this.setAttr(attr);
+//    this.setPosition(cc.p(point.x + this.blockSize.width / 2, this.blockSize.height / 2));
   },
   initBody: function(attr, point) {
-    console.log(point, "point");
-    this.body = new cp.StaticBody();
-    body.setPos(point);
+//    this.body = new cp.StaticBody();
+    this.body = new cp.Body(1, cp.momentForBox(1, this.blockSize.width, this.blockSize.height));
+    this.body.setPos(cc.p(point.x + this.blockSize.width / 2,
+      point.y + this.blockSize.height / 2));
+//    this.body.setVel({x: -200, y: 0});
+    this.space.addBody(this.body);
     this.setBody(this.body);
   },
   initShape: function() {
     this.shape = new cp.BoxShape(this.body, this.blockSize.width, this.blockSize.height);
     this.shape.setCollisionType(SpriteTag.block);
-    this.shape.setSensor(true);
-    this.space.addStaticShape(this.shape);
-//    this.body.setUserData(this);
+    this.shape.setElasticity(1);
+    this.shape.setFriction(1);
+//    this.shape.setSensor(true);
+    this.space.addShape(this.shape);
   },
   setAttr: function(attr) {
     this._y = attr.y;

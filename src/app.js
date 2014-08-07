@@ -29,6 +29,7 @@ var GameLayer = cc.Layer.extend({
     this.initPhysics();
     this.initPlayer();
     this.initBlockLayer();
+    this.setupDebugNode();
 
     this.space.addCollisionHandler(SpriteTag.player, SpriteTag.block,
       this.collisionBegin.bind(this),
@@ -107,38 +108,47 @@ var GameLayer = cc.Layer.extend({
     this.space = new cp.Space();
     this.space.gravity = cp.v(0, -1000);
     var wallBottom = new cp.SegmentShape(this.space.staticBody,
-      cp.v(0, 0),// start point
-      cp.v(4294967295, 0),// MAX INT:4294967295
+      cp.v(-Max, 0),// start point
+      cp.v(Max, 0),// MAX INT:4294967295
       0);// thickness of wall
+    wallBottom.setFriction(0);
     this.space.addStaticShape(wallBottom);
   },
   initBlockLayer: function() {
     this.blockLayer = new BlockLayer(this);
-    this.blockLayer.setPosition(cc.PointZero());
+//    this.blockLayer.setPosition(cc.PointZero());
     this.blockLayer.moveBlocks(2);
     this.addChild(this.blockLayer);
   },
   update: function(delta) {
-    this.space.step(delta);
+    var steps = 2;
+    delta /= steps;
+    for (var i = 0; i < steps; i++) {
+      this.space.step(delta);
+    }
   },
   collisionBegin: function(arbiter, space) {
-    cc.log('collision begin');
+    this.player.setRotation(0);
     var shapes = arbiter.getShapes();
-    var collTypeA = shapes[0].collision_type;
-    var collTypeB = shapes[1].collision_type;
-    cc.log('Collision Type A:' + collTypeA);
-    cc.log('Collision Type B:' + collTypeB);
+    cc.each(shapes, function(shape) {
+//      shape.body.setRotation(0);
+      shape.body.setVel({x: 0, y: 0});
+    });
+//    var collTypeA = shapes[0].collision_type;
+//    var collTypeB = shapes[1].collision_type;
+//    console.log('Collision Type A:' + collTypeA);
+//    console.log('Collision Type B:' + collTypeB);
     return true;
   },
   collisionPre: function(arbiter, space) {
-//    cc.log('collision pre');
+//    console.log('collision pre');
     return true;
   },
   collisionPost: function(arbiter, space) {
-//    cc.log('collision post');
+//    console.log('collision post');
   },
   collisionSeparate: function(arbiter, space) {
-//    cc.log('collision separate');
+//    console.log('collision separate');
   },
   isSoundOn: function() {
     return !this.isBgEffectPaused;
@@ -151,6 +161,13 @@ var GameLayer = cc.Layer.extend({
   },
   addColorDot: function() {
 
+  },
+  setupDebugNode: function() {
+    if (PhysicsDebug) {
+      this._debugNode = cc.PhysicsDebugNode.create(this.space);
+      this._debugNode.visible = true;
+      this.addChild(this._debugNode);
+    }
   }
 });
 
@@ -171,4 +188,3 @@ var MainScene = cc.Scene.extend({
     Cloud.create();
   }
 });
-

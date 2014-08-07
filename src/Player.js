@@ -22,13 +22,16 @@ var Player = cc.PhysicsSprite.extend({
     this.scheduleUpdate();
   },
   initBody: function() {
-    this.body = new cp.Body(1, cp.momentForBox(1, this.playerSize.width, this.playerSize.height));
-    this.body.p = cc.p(200, 700);
+    this.m = 0.1
+    this.body = new cp.Body(this.m, cp.momentForBox(this.m, this.playerSize.width, this.playerSize.height));
+    this.body.setPos(cc.p(200, 700));
     this.gameLayer.space.addBody(this.body);
     this.setBody(this.body);
   },
   initShape: function() {
     this.shape = new cp.BoxShape(this.body, this.playerSize.width, this.playerSize.height);
+    this.shape.setElasticity(0);
+    this.shape.setFriction(0);
     this.shape.setCollisionType(SpriteTag.player);
     this.gameLayer.space.addShape(this.shape);
   },
@@ -44,10 +47,12 @@ var Player = cc.PhysicsSprite.extend({
       this.playerState = player_state.down;
     }
   },
+  setRotation: function() {
+    this._super.apply(this, arguments);
+  },
   rotateAction: function() {
-    cc.log("rotate");
+    console.log("rotate");
     var action = cc.repeatForever(cc.rotateBy(1, 360));
-    action.setTag(11);
     this.runAction(action);
   },
   walkAction: function(y) {
@@ -98,7 +103,7 @@ var Player = cc.PhysicsSprite.extend({
     this.playerState = player_state.jump;
 
     this.rotateAction();
-    this.body.applyImpulse(cp.v(0, 500), cp.v(0, 0));
+    this.body.applyImpulse(cp.v(0, this.m * 500), cp.v(0, 0));
 //    var seqAction = cc.sequence(
 //      cc.jumpBy(1, cc.p(0, 1), 200, 1),
 //      cc.callFunc(this.jumpDoneAction.bind(this)));
@@ -124,7 +129,7 @@ var Player = cc.PhysicsSprite.extend({
     this.playerState = player_state.jumpback;
   },
   update: function(dt) {
-    var vel = this.body.getVel();
-    console.log("vel.y", vel.y)
+//    var vel = this.body.getVel();
+//    console.log("vel.y", vel.y)
   }
 });

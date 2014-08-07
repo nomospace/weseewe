@@ -1,3 +1,6 @@
+var PhysicsDebug = false;
+var Max = 4294967295;
+
 var ZOrder = {
   background: 0,
   gameLayer: 1,
