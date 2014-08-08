@@ -23,7 +23,7 @@ var BlockLayer = cc.Layer.extend({
     do {
       tailPoint = this.lastBlock.getPosition();
       this.addTailBlock(blockAttr);
-    } while (tailPoint.x < visibleRect.width);
+    } while (tailPoint.x < cc.visibleRect.width);
 
     return this;
   },

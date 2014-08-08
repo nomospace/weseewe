@@ -1,30 +1,21 @@
 var Cloud = cc.Sprite.extend({
-  ctor: function() {
+  ctor: function(parent) {
     this._super(res.s_cloud_bottom);
+    parent.addChild(this);
+    this.setPos();
     this.rotate();
   },
+  setPos: function() {
+    var minHeight = 500;
+    this.attr({
+      x: cc.visibleRect.width + this._contentSize.width / 2,
+      y: random(minHeight, cc.visibleRect.height)
+    });
+  },
   rotate: function() {
-    var self = this;
     var rotateAction = cc.rotateBy(80, random() > 0.5 ? 360 : -360).repeatForever();
     var moveAction = cc.moveBy(30, cc.p(-(cc.visibleRect.width + this._contentSize.width), 0));
-    var moveActionSequence = cc.sequence(moveAction, cc.callFunc(function() {
-      self.destroy();
-    }));
-    this.runAction(rotateAction);
-    this.runAction(moveActionSequence);
-  },
-  destroy: function() {
-    this.removeFromParent(true);
+    var moveActionSequence = cc.sequence(moveAction, cc.callFunc(this.setPos.bind(this)));
+    this.runAction(cc.spawn([rotateAction, moveActionSequence]));
   }
 });
-
-Cloud.create = function() {
-  var cloud = new Cloud();
-  var minHeight = 500
-  cloud.attr({
-    x: visibleRect.width + cloud._contentSize.width / 2,
-    y: random(minHeight, visibleRect.height)
-  });
-  g_sharedGameLayer.addChild(cloud);
-  return cloud;
-};

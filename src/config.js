@@ -11,5 +11,7 @@ var ZOrder = {
 var SpriteTag = {
   block: 0,
   player: 1,
-  other: 2
+  other: 2,
+  start: 3,
+  sound: 4
 };

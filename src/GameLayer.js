@@ -1,15 +1,3 @@
-var g_sharedGameLayer;
-var visibleRect = cc.visibleRect;
-var random = function(m, n) {
-  if (m == undefined && n == undefined) {
-    return Math.random();
-  } else {
-    // fixme
-    m = m == undefined ? 1 : m;
-    n = n == undefined ? 1 : n;
-    return Math.random() * (n - m) + m;
-  }
-};
 var game_state = {
   ready: 0,
   begin: 1,
@@ -17,15 +5,14 @@ var game_state = {
   end: 3
 };
 
+var bgSoundId = cc.audioEngine.playEffect(res.s_music_track);
+
 var GameLayer = cc.Layer.extend({
-  sprite: null,
   ctor: function() {
     this._super();
-    g_sharedGameLayer = this;
     this.gameState = game_state.begin;
-//    this.bgEffect = cc.audioEngine.playEffect(res.s_music_track);
     this.initEvents();
-    this.initStartUp();
+    this.initButtons();
     this.initPhysics();
     this.initPlayer();
     this.initBlockLayer();
@@ -43,61 +30,63 @@ var GameLayer = cc.Layer.extend({
     this._super();
     this.scheduleUpdate();
   },
+  initButtons: function() {
+    this.startButton = cc.Sprite.create(res.s_start);
+    this.startButton.setPosition(cc.visibleRect.center);
+    this.addChild(this.startButton, ZOrder.startup, SpriteTag.start);
+    var startLabel = cc.LabelTTF.create("START", "Arial", 60,
+      cc.size(this.startButton.width, this.startButton.height), cc.TEXT_ALIGNMENT_CENTER, cc.VERTICAL_TEXT_ALIGNMENT_CENTER);
+    startLabel.setAnchorPoint(cc.PointZero());
+    this.startButton.addChild(startLabel);
+
+    this.soundButton = cc.Sprite.create(res.s_sound);
+    this.soundButton._texture = cc.textureCache.addImage(res.s_sound);
+    this.soundButton._offTexture = cc.textureCache.addImage(res.s_sound_off);
+    this.soundButton.attr({
+      anchorX: 0,
+      anchorY: 0,
+      x: cc.visibleRect.bottomLeft.x + 20,
+      y: cc.visibleRect.bottomLeft.y + 20
+    });
+    this.addChild(this.soundButton, ZOrder.startup, SpriteTag.sound);
+
+  },
+  startGame: function() {
+    this.startButton.setVisible(false);
+  },
+  playSound: function() {
+    if (this.isBgSoundPaused) {
+      this.isBgSoundPaused = false;
+      this.soundButton.setTexture(this.soundButton._texture);
+      cc.audioEngine.resumeEffect(bgSoundId);
+    } else {
+      this.isBgSoundPaused = true;
+      this.soundButton.setTexture(this.soundButton._offTexture);
+      cc.audioEngine.pauseEffect(bgSoundId);
+    }
+    return false;
+  },
   initEvents: function() {
-    if ('touches' in cc.sys.capabilities) {
-      cc.eventManager.addListener({
-        event: cc.EventListener.TOUCH_ALL_AT_ONCE,
-        onTouchBegan: this.onTouchBegan.bind(this)
-      }, this);
-    } else if ('mouse' in cc.sys.capabilities)
-      cc.eventManager.addListener({
-        event: cc.EventListener.MOUSE,
-        onMouseDown: this.onTouchBegan.bind(this)
-      }, this);
+    addListener(this.onTouchBegan.bind(this), this);
   },
   onTouchBegan: function(touches, event) {
-//    if (touches && event) {
-//      for (var it = 0; it < touches.length; it++) {
-//        var touch = touches[it];
-//        if (!touch)
-//          break;
-//
-//        var location = touch.getLocation();
-//        console.log(location);
-//      }
-//    } else {
-//      console.log(touches.getLocation());
-//    }
+    var tag = touches.getCurrentTarget().tag;
+    console.log(tag); // Layer的默认tag
+    if (touches && event) {
+      for (var it = 0; it < touches.length; it++) {
+        var touch = touches[it];
+        if (!touch)
+          break;
+
+        var location = touch.getLocation();
+        console.log(location);
+      }
+    } else {
+      console.log(touches.getLocation());
+    }
 //    if (this.gameState == game_state.begin) {
     this.player.jumpUpAction(true);
 //    }
-  },
-  initStartUp: function() {
-    var ui = ccs.uiReader.widgetFromJsonFile(res.s_startupJson);
-    this.addChild(ui, ZOrder.startup);
-//    ccs.actionManager.playActionByName(res.s_startupShortJson, "In");
-    var soundButton = ccui.helper.seekWidgetByName(ui, "sound");
-    var beginButton = ccui.helper.seekWidgetByName(ui, "begin");
-    beginButton.setTouchEnabled(true);
-    beginButton.addTouchEventListener(this.startupButtonTouchEvent, this);
-    soundButton.setTouchEnabled(true);
-    soundButton.addTouchEventListener(this.startupButtonTouchEvent, this);
-  },
-  startupButtonTouchEvent: function(sender, type) {
-    if (type == ccui.Widget.TOUCH_ENDED) {
-      var name = sender.name;
-      if (name == "sound") {
-        if (this.isBgEffectPaused) {
-          this.isBgEffectPaused = false;
-          cc.audioEngine.resumeEffect(this.bgEffect);
-        } else {
-          this.isBgEffectPaused = true;
-          cc.audioEngine.pauseEffect(this.bgEffect);
-        }
-      } else if (name == "begin") {
-//        ccs.actionManager.playActionByName(res.s_startupShortJson, "Out");
-      }
-    }
   },
   initPlayer: function() {
     this.player = new Player(this);
@@ -126,7 +115,7 @@ var GameLayer = cc.Layer.extend({
     }
   },
   collisionBegin: function(arbiter, space) {
-    console.log("begin");
+//    console.log("begin");
     var shapes = arbiter.getShapes();
     cc.each(shapes, function(shape) {
 //      shape.body.setRotation(0);
@@ -149,10 +138,10 @@ var GameLayer = cc.Layer.extend({
 //    console.log('collision post');
   },
   collisionSeparate: function(arbiter, space) {
-    console.log('collision separate');
+//    console.log('collision separate');
   },
   isSoundOn: function() {
-    return !this.isBgEffectPaused;
+    return !this.isBgSoundPaused;
   },
   getGameState: function() {
     return this.gameState;
@@ -180,17 +169,19 @@ var GameLayer = cc.Layer.extend({
 var MainScene = cc.Scene.extend({
   onEnter: function() {
     this._super();
-
-    var visibleRect = cc.visibleRect;
-    var colorLayer = cc.LayerColor.create(cc.color(159, 213, 204, 0), visibleRect.width, visibleRect.height)
-    this.addChild(colorLayer, ZOrder.background);
-
-    var layer = new GameLayer();
-    this.addChild(layer, ZOrder.gameLayer);
-
+    this.addColorLayer();
+    this.addGameLayer();
     this.schedule(this.createCloud, 9, cc.REPEAT_FOREVER, 0.1)
   },
+  addGameLayer: function() {
+    this.gameLayer = new GameLayer();
+    this.addChild(this.gameLayer, ZOrder.gameLayer);
+  },
+  addColorLayer: function() {
+    var colorLayer = cc.LayerColor.create(cc.color(159, 213, 204, 0), cc.visibleRect.width, cc.visibleRect.height);
+    this.addChild(colorLayer, ZOrder.background);
+  },
   createCloud: function() {
-    Cloud.create();
+    new Cloud(this.gameLayer);
   }
 });

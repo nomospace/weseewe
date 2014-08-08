@@ -2,15 +2,12 @@ var res = {
   s_cloud_bottom: "res/cloudBottom@2x.png",
   s_block_top: "res/blockTop@2x.png",
   s_player_top: "res/playerTop@2x.png",
-  s_cloudAnimationJson: "res/animation/animation.ExportJson",
-  s_cloudAnimationPlist: "res/animation/animation0.plist",
-  s_cloudAnimationPng: "res/animation/animation0.png",
-  s_startupJson: "res/ui/StartupUI_1.ExportJson",
-  s_startupShortJson: "StartupUI_1.ExportJson",
-  s_startupPlist: "res/ui/StartupUI0.plist",
-  s_startupPng: "res/ui/StartupUI0.png",
-  s_startupFont: "res/ui/fonts/titleFont@2x.fnt",
-  s_startupFontPng: "res/ui/fonts/titleFont@2x.png",
+  s_player_bottom: "res/playerBottom@2x.png",
+  s_sound: "res/sound@2x.png",
+  s_sound_off: "res/soundOff@2x.png",
+  s_sound_name: "sound@2x.png",
+  s_sound_off_name: "soundOff@2x.png",
+  s_start: "res/start@2x.png",
   s_music_track: "res/music/track1.wav",
   s_music_color: "res/music/color.wav",
   s_music_jumpA: "res/music/jumpA.wav",
@@ -23,15 +20,12 @@ var g_resources = [
   res.s_cloud_bottom,
   res.s_block_top,
   res.s_player_top,
+  res.s_player_bottom,
+  res.s_sound,
+  res.s_sound_off,
+  res.s_start,
   //plist
-  res.s_cloudAnimationJson,
-  res.s_cloudAnimationPlist,
-  res.s_cloudAnimationPng,
-  res.s_startupJson,
-  res.s_startupPlist,
-  res.s_startupPng,
-  res.s_startupFont,
-  res.s_startupFontPng,
+
   //fnt
 
   //tmx
@@ -43,4 +37,5 @@ var g_resources = [
   res.s_music_jumpB,
   res.s_music_pop
   //effect
+
 ];
