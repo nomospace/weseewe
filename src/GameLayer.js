@@ -35,12 +35,14 @@ var GameLayer = cc.Layer.extend({
     this.startButton.setPosition(cc.visibleRect.center);
     this.addChild(this.startButton, ZOrder.startup, SpriteTag.start);
     var startLabel = cc.LabelTTF.create("START", "Arial", 60,
-      cc.size(this.startButton.width, this.startButton.height), cc.TEXT_ALIGNMENT_CENTER, cc.VERTICAL_TEXT_ALIGNMENT_CENTER);
+      cc.size(this.startButton.width, this.startButton.height),
+      cc.TEXT_ALIGNMENT_CENTER, cc.VERTICAL_TEXT_ALIGNMENT_CENTER);
     startLabel.setAnchorPoint(cc.PointZero());
     this.startButton.addChild(startLabel);
+    addListener(this.startGame.bind(this), this.startButton);
 
     this.soundButton = cc.Sprite.create(res.s_sound);
-    this.soundButton._texture = cc.textureCache.addImage(res.s_sound);
+    this.soundButton._onTexture = cc.textureCache.addImage(res.s_sound);
     this.soundButton._offTexture = cc.textureCache.addImage(res.s_sound_off);
     this.soundButton.attr({
       anchorX: 0,
@@ -49,22 +51,40 @@ var GameLayer = cc.Layer.extend({
       y: cc.visibleRect.bottomLeft.y + 20
     });
     this.addChild(this.soundButton, ZOrder.startup, SpriteTag.sound);
+    addListener(this.playSound.bind(this), this.soundButton);
 
   },
-  startGame: function() {
+  startGame: function(t) {
+    if (!this.checkAndStopPropagation(t))
+      return;
     this.startButton.setVisible(false);
   },
-  playSound: function() {
+  playSound: function(t) {
+//    t.getCurrentTarget() -> this.soundButton   cocos sucks!
+    if (!this.checkAndStopPropagation(t))
+      return;
     if (this.isBgSoundPaused) {
       this.isBgSoundPaused = false;
-      this.soundButton.setTexture(this.soundButton._texture);
+      this.soundButton.setTexture(this.soundButton._onTexture);
       cc.audioEngine.resumeEffect(bgSoundId);
     } else {
       this.isBgSoundPaused = true;
       this.soundButton.setTexture(this.soundButton._offTexture);
       cc.audioEngine.pauseEffect(bgSoundId);
     }
-    return false;
+  },
+  checkAndStopPropagation: function(t) {
+//    getPosition? getLocation?
+    var target = t.getCurrentTarget();
+    var rect = target.getTextureRect();
+    rect.x += target.x;
+    rect.y += target.y;
+    // buggy TODO
+    var contained = cc.rectContainsPoint(rect, t.getLocation());
+    if (contained) {
+      t.stopPropagation();
+    }
+    return contained;
   },
   initEvents: function() {
     addListener(this.onTouchBegan.bind(this), this);
