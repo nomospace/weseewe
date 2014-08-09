@@ -26,10 +26,9 @@ var GameLayer = cc.Layer.extend({
 
     return true;
   },
-  onEnter: function() {
-    this._super();
-    this.scheduleUpdate();
-  },
+//  onEnter: function() {
+//    this._super();
+//  },
   initButtons: function() {
     this.startButton = cc.Sprite.create(res.s_start);
     this.startButton.setPosition(cc.visibleRect.center);
@@ -45,10 +44,10 @@ var GameLayer = cc.Layer.extend({
     this.soundButton._onTexture = cc.textureCache.addImage(res.s_sound);
     this.soundButton._offTexture = cc.textureCache.addImage(res.s_sound_off);
     this.soundButton.attr({
-      anchorX: 0,
+      anchorX: 1,
       anchorY: 0,
-      x: cc.visibleRect.bottomLeft.x + 20,
-      y: cc.visibleRect.bottomLeft.y + 20
+      x: cc.visibleRect.bottomRight.x - 20,
+      y: cc.visibleRect.bottomRight.y + 20
     });
     this.addChild(this.soundButton, ZOrder.startup, SpriteTag.sound);
     addListener(this.playSound.bind(this), this.soundButton);
@@ -58,6 +57,8 @@ var GameLayer = cc.Layer.extend({
     if (!this.checkAndStopPropagation(t))
       return;
     this.startButton.setVisible(false);
+    this.scheduleUpdate();
+    this.blockLayer.moveBlocks(2);
   },
   playSound: function(t) {
 //    t.getCurrentTarget() -> this.soundButton   cocos sucks!
@@ -124,7 +125,6 @@ var GameLayer = cc.Layer.extend({
   initBlockLayer: function() {
     this.blockLayer = new BlockLayer(this);
 //    this.blockLayer.setPosition(cc.PointZero());
-    this.blockLayer.moveBlocks(2);
     this.addChild(this.blockLayer);
   },
   update: function(delta) {
