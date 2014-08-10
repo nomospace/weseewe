@@ -3,6 +3,7 @@ var res = {
   s_block_top: "res/blockTop@2x.png",
   s_player_top: "res/playerTop@2x.png",
   s_player_bottom: "res/playerBottom@2x.png",
+  s_color_dot: "res/colorDot@2x.png",
   s_sound: "res/sound@2x.png",
   s_sound_off: "res/soundOff@2x.png",
   s_sound_name: "sound@2x.png",
@@ -24,6 +25,7 @@ var g_resources = [
   res.s_sound,
   res.s_sound_off,
   res.s_start,
+  res.s_color_dot,
   //plist
 
   //fnt

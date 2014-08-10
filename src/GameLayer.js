@@ -11,6 +11,7 @@ var GameLayer = cc.Layer.extend({
   ctor: function() {
     this._super();
     this.gameState = game_state.begin;
+    this.colorDots = [];
     this.initEvents();
     this.initButtons();
     this.initPhysics();
@@ -51,10 +52,8 @@ var GameLayer = cc.Layer.extend({
     });
     this.addChild(this.soundButton, ZOrder.startup, SpriteTag.sound);
     addListener(this.playSound.bind(this), this.soundButton);
-
   },
   startGame: function(t) {
-    console.log("start");
     if (!this.checkAndStopPropagation(t))
       return;
     this.startButton.setVisible(false);
@@ -62,7 +61,6 @@ var GameLayer = cc.Layer.extend({
     this.blockLayer.moveBlocks(2);
   },
   playSound: function(t) {
-    console.log("sound");
 //    t.getCurrentTarget() -> this.soundButton   cocos sucks!
     if (!this.checkAndStopPropagation(t))
       return;
@@ -94,23 +92,21 @@ var GameLayer = cc.Layer.extend({
     addListener(this.onTouchBegan.bind(this), this);
   },
   onTouchBegan: function(touches, event) {
-    var tag = touches.getCurrentTarget().tag;
-    console.log(tag); // Layer的默认tag
-    if (touches && event) {
-      for (var it = 0; it < touches.length; it++) {
-        var touch = touches[it];
-        if (!touch)
-          break;
+    /*    var tag = touches.getCurrentTarget().tag;
+     console.log(tag); // Layer的默认tag
+     if (touches && event) {
+     for (var it = 0; it < touches.length; it++) {
+     var touch = touches[it];
+     if (!touch)
+     break;
 
-        var location = touch.getLocation();
-        console.log(location);
-      }
-    } else {
-      console.log(touches.getLocation());
-    }
-//    if (this.gameState == game_state.begin) {
-    this.player.jumpUpAction(true);
-//    }
+     var location = touch.getLocation();
+     console.log(location);
+     }
+     } else {
+     console.log(touches.getLocation());
+     }*/
+    this.player.jumpUpAction();
   },
   initPlayer: function() {
     this.player = new Player(this);
@@ -119,19 +115,16 @@ var GameLayer = cc.Layer.extend({
   initPhysics: function() {
     this.space = new cp.Space();
     this.space.gravity = cp.v(0, -1000);
-    var wallBottom = new cp.SegmentShape(this.space.staticBody, cp.v(-Max, 0),// start point
-      cp.v(Max, 0),// MAX INT:4294967295
-      0);// thickness of wall
+    var wallBottom = new cp.SegmentShape(this.space.staticBody, cp.v(-Max, 0), cp.v(Max, 0), 0);
     wallBottom.setFriction(0);
     this.space.addShape(wallBottom);
   },
   initBlockLayer: function() {
     this.blockLayer = new BlockLayer(this);
-//    this.blockLayer.setPosition(cc.PointZero());
     this.addChild(this.blockLayer);
   },
   update: function(delta) {
-    var steps = 2;
+    var steps = 1;
     delta /= steps;
     for (var i = 0; i < steps; i++) {
       this.space.step(delta);
@@ -139,11 +132,11 @@ var GameLayer = cc.Layer.extend({
   },
   collisionBegin: function(arbiter, space) {
 //    console.log("begin");
-    var shapes = arbiter.getShapes();
-    cc.each(shapes, function(shape) {
+//    var shapes = arbiter.getShapes();
+//    cc.each(shapes, function(shape) {
 //      shape.body.setRotation(0);
-      shape.body.setVel({x: 0, y: 0});
-    });
+//      shape.body.setVel({x: 0, y: 0});
+//    });
     this.player.setRotation(0);
     this.player.setPlayerState(player_state);
     this.player.walkAction();
@@ -172,8 +165,21 @@ var GameLayer = cc.Layer.extend({
   setGameState: function(state) {
     this.gameState = state;
   },
-  addColorDot: function() {
-
+  addColorDot: function(color) {
+    var dot = cc.Sprite.create(res.s_color_dot);
+    var gap = 50;
+    dot.setColor(color);
+    this.colorDots.push(dot);
+    this.addChild(dot);
+    var length = this.colorDots.length;
+    if (length == 1) {
+      dot.setPosition(cc.pAdd(cc.visibleRect.center, cc.p(0, 200)));
+    } else {
+      var x = ( cc.visibleRect.width - gap * (length - 1)) / 2;
+      cc.each(this.colorDots, function(cd, i) {
+        this.colorDots[i].setPosition(cc.p(x + gap * i, this.colorDots[0].y));
+      }.bind(this));
+    }
   },
   setupDebugNode: function() {
     if (PhysicsDebug) {

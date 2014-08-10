@@ -1,6 +1,4 @@
 var block_layer_tag = 102;
-var grabable_mask_bit = 1 << 31;
-var not_grabable_mask = ~grabable_mask_bit;
 
 var BlockLayer = cc.Layer.extend({
   ctor: function(parent) {
@@ -53,6 +51,7 @@ var BlockLayer = cc.Layer.extend({
           }
 
 //          y = random(-120, 120);
+          y = random(-200, 0);
         }
 
         this.blocksAttr.push({y: y, color: color, allow: allow});
@@ -125,8 +124,7 @@ var BlockLayer = cc.Layer.extend({
 
 var Block = cc.PhysicsSprite.extend({
   ctor: function(attr, point, space) {
-    var magic = 120;
-    this._super(res.s_block_top, cc.rect(26, 30, 204, random(magic, 482)));
+    this._super(res.s_block_top, cc.rect(26, 30, 204, random(120, 482)));
     this.space = space;
     this.blockSize = this.getContentSize();
     this.initBody(attr, point);

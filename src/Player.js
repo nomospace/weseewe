@@ -12,7 +12,6 @@ var Player = cc.PhysicsSprite.extend({
   ctor: function(parent) {
     this._super(res.s_player_top, cc.rect(8, 8, 60, 60));
     this.playerState = player_state.walk;
-    this.playerState2 = player_state.walk;
     this.jumpCnt = 0;
     this.playerSize = this.getContentSize();
     this.gameLayer = parent;
@@ -35,67 +34,15 @@ var Player = cc.PhysicsSprite.extend({
     this.shape.setCollisionType(SpriteTag.player);
     this.gameLayer.space.addShape(this.shape);
   },
-  downAction: function() {
-    if (this.playerState == player_state.jump || this.playerState == player_state.jumpback) {
-      return;
-    }
-    if (this.playerState != player_state.down) {
-      var point = this.getParent().convertToWorldSpace(this.getPosition());
-      var height = point.y + 70;
-      var moveAction = cc.moveBy(height / 80 / 10, cc.p(0, -height));
-      this.runAction(moveAction.easing(cc.easeSineIn()));
-      this.playerState = player_state.down;
-    }
-  },
   rotateAction: function() {
-    this.setRotation(0);
-//    console.log("rotate");
-//    var action = cc.repeatForever(cc.rotateBy(1, 360));
-//    this.runAction(action);
+//    this.setRotation(0);
+    var action = cc.repeatForever(cc.rotateBy(1, 360));
+    this.runAction(action);
   },
-  walkAction: function(y) {
+  walkAction: function() {
     this.jumpCnt = 0;
-/*    if (this.playerState == player_state.jump) {
-      return;
-    }
-    if (this.playerState != player_state.walk) {
-      this.stopAllActions();
-      this.setRotation(0);
-      var size = this.getContentSize();
-      this.setPosition(cc.p(this.getPosition().x, y + size.height / 2));
-      this.jumpCnt = 0;
-      this.playerState = player_state.walk;
-    }*/
   },
-  movebackAction: function(duration, deltaPosition) {
-    // fixme
-    if (this.playerState2 != player_state.back) {
-      var moveForever = cc.repeatForever(cc.moveBy(duration, deltaPosition));
-      moveForever.setTag(player_state.back);
-      this.runAction(moveForever);
-      this.playerState2 = player_state.back;
-    }
-  },
-  jumpUpAction: function(touchBegin) {
-    /*    if (this.jumpCnt == 0 && this.playerState != player_state.walk) {
-     return false;
-     }
-
-
-     if (!touchBegin) {
-     if (this.playerState == player_state.jump) {
-     this.jumpUpAction.change();
-     }
-     return false;
-     }
-
-     if (this.playerState == player_state.jump
-     || this.playerState == player_state.jumpback) {
-     this.stopActionByTag(11);
-     this.stopActionByTag(12);
-     this.stopActionByTag(13);
-     }*/
-
+  jumpUpAction: function() {
     if (this.jumpCnt >= 2) {
       return false;
     }
@@ -103,8 +50,8 @@ var Player = cc.PhysicsSprite.extend({
     this.playerState = player_state.jump;
 
     this.rotateAction();
-    this.body.setVel({x: 0, y: 500});
-//    this.body.applyImpulse(cp.v(0, this.m * 500), cp.v(0, 0));
+    this.body.setVel({x: 0, y: 0});
+    this.body.applyImpulse(cp.v(0, this.m * 500), cp.v(0, 0));
 //    var seqAction = cc.sequence(
 //      cc.jumpBy(1, cc.p(0, 1), 200, 1),
 //      cc.callFunc(this.jumpDoneAction.bind(this)));
@@ -119,15 +66,6 @@ var Player = cc.PhysicsSprite.extend({
       }
     }
     return true;
-  },
-  jumpDoneAction: function() {
-//    var pos = g_sharedGameLayer.convertToWorldSpace(this.getPosition());
-//    var height = pos.y + 100;
-//    var downAction = cc.moveBy(height / 130 / 10, cc.p(0, -height));
-//    var easingAction = downAction.easing(cc.easeSineIn());
-//    easingAction.setTag(13);
-//    this.runAction(easingAction);
-    this.playerState = player_state.jumpback;
   },
   setPlayerState: function(state) {
     this.playerState = state;
