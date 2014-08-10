@@ -77,12 +77,7 @@ var GameLayer = cc.Layer.extend({
   checkAndStopPropagation: function(t) {
 //    getPosition? getLocation?
     var target = t.getCurrentTarget();
-    var size = target.getContentSize();
-    var rect = target.getTextureRect();
-    rect.x += target.x - target.anchorX * size.width;
-    rect.y += target.y - target.anchorY * size.height;
-    // buggy TODO
-    var contained = cc.rectContainsPoint(rect, t.getLocation());
+    var contained = cc.rectContainsPoint(target.getBoundingBox(), t.getLocation());
     if (contained) {
       t.stopPropagation();
     }
