@@ -54,6 +54,7 @@ var GameLayer = cc.Layer.extend({
 
   },
   startGame: function(t) {
+    console.log("start");
     if (!this.checkAndStopPropagation(t))
       return;
     this.startButton.setVisible(false);
@@ -61,6 +62,7 @@ var GameLayer = cc.Layer.extend({
     this.blockLayer.moveBlocks(2);
   },
   playSound: function(t) {
+    console.log("sound");
 //    t.getCurrentTarget() -> this.soundButton   cocos sucks!
     if (!this.checkAndStopPropagation(t))
       return;
@@ -77,9 +79,10 @@ var GameLayer = cc.Layer.extend({
   checkAndStopPropagation: function(t) {
 //    getPosition? getLocation?
     var target = t.getCurrentTarget();
+    var size = target.getContentSize();
     var rect = target.getTextureRect();
-    rect.x += target.x;
-    rect.y += target.y;
+    rect.x += target.x - target.anchorX * size.width;
+    rect.y += target.y - target.anchorY * size.height;
     // buggy TODO
     var contained = cc.rectContainsPoint(rect, t.getLocation());
     if (contained) {

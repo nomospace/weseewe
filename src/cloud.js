@@ -6,10 +6,10 @@ var Cloud = cc.Sprite.extend({
     this.rotate();
   },
   setPos: function() {
-    var minHeight = 500;
+    var minHeight = 700, maxHeight = cc.visibleRect.height - this._contentSize.height / 2;
     this.attr({
       x: cc.visibleRect.width + this._contentSize.width / 2,
-      y: random(minHeight, cc.visibleRect.height)
+      y: random(minHeight, maxHeight)
     });
   },
   rotate: function() {
