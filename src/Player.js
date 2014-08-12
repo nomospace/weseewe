@@ -41,6 +41,7 @@ var Player = cc.PhysicsSprite.extend({
   },
   walkAction: function() {
     this.jumpCnt = 0;
+    this.body.setVel({x: 0, y: 0});
   },
   jumpUpAction: function() {
     if (this.jumpCnt >= 2) {

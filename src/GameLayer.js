@@ -34,11 +34,11 @@ var GameLayer = cc.Layer.extend({
     this.startButton = cc.Sprite.create(res.s_start);
     this.startButton.setPosition(cc.visibleRect.center);
     this.addChild(this.startButton, ZOrder.startup, SpriteTag.start);
-    var startLabel = cc.LabelTTF.create("START", "Arial", 60,
+    this.startLabel = cc.LabelTTF.create("START", "Arial", 60,
       cc.size(this.startButton.width, this.startButton.height),
       cc.TEXT_ALIGNMENT_CENTER, cc.VERTICAL_TEXT_ALIGNMENT_CENTER);
-    startLabel.setAnchorPoint(cc.PointZero());
-    this.startButton.addChild(startLabel);
+    this.startLabel.setAnchorPoint(cc.PointZero());
+    this.startButton.addChild(this.startLabel);
     addListener(this.startGame.bind(this), this.startButton);
 
     this.soundButton = cc.Sprite.create(res.s_sound);
@@ -110,7 +110,8 @@ var GameLayer = cc.Layer.extend({
   initPhysics: function() {
     this.space = new cp.Space();
     this.space.gravity = cp.v(0, -1000);
-    var wallBottom = new cp.SegmentShape(this.space.staticBody, cp.v(-Max, 0), cp.v(Max, 0), 0);
+    var wallBottom = new cp.SegmentShape(this.space.staticBody, cp.v(-Max, -200), cp.v(Max, -200), 0);
+    wallBottom.setElasticity(0);
     wallBottom.setFriction(0);
     this.space.addShape(wallBottom);
   },
@@ -149,6 +150,11 @@ var GameLayer = cc.Layer.extend({
 //    console.log('collision post');
   },
   collisionSeparate: function(arbiter, space) {
+    if (this.player.y <= 0) {
+      this.startButton.setVisible(true);
+      this.startLabel.setString("GAME OVER");
+      this.unscheduleUpdate();
+    }
 //    console.log('collision separate');
   },
   isSoundOn: function() {
@@ -161,11 +167,12 @@ var GameLayer = cc.Layer.extend({
     this.gameState = state;
   },
   addColorDot: function(color) {
+    if (!color) return;
     var dot = cc.Sprite.create(res.s_color_dot);
     var gap = 50;
     dot.setColor(color);
     this.colorDots.push(dot);
-    this.addChild(dot);
+    this.addChild(dot, ZOrder.colorDot);
     var length = this.colorDots.length;
     if (length == 1) {
       dot.setPosition(cc.pAdd(cc.visibleRect.center, cc.p(0, 200)));

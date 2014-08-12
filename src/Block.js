@@ -34,8 +34,8 @@ var BlockLayer = cc.Layer.extend({
           color = colors[0];
           allow = true;
         } else {
-          var b1 = this.blocksAttr[blockIndex - 2]._allow;
-          var b2 = this.blocksAttr[blockIndex - 1]._allow;
+          var b1 = this.blocksAttr[blockIndex - 2].allow;
+          var b2 = this.blocksAttr[blockIndex - 1].allow;
           if (!b1 && !b2) {
             allow = true;
           } else if (b1 && b2) {
@@ -51,9 +51,10 @@ var BlockLayer = cc.Layer.extend({
           }
 
 //          y = random(-120, 120);
-          y = random(-200, 0);
+          y = random(-800, 0);
         }
 
+        console.log(color);
         this.blocksAttr.push({y: y, color: color, allow: allow});
       }
     }
@@ -152,6 +153,6 @@ var Block = cc.PhysicsSprite.extend({
     this._y = attr.y;
     this._color = attr.color;
     this._allow = attr.allow;
-    this.setColor(this._color);
+    this._color && this.setColor(this._color);
   }
 });
