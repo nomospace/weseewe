@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>WeSeeWe - 跳跃方块</title>
+    <link rel="icon" type="image/x-icon" href="res/favicon.ico"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            overflow: hidden;
+        }
+        #gameContainer {
+            position: relative;
+            touch-action: none;
+        }
+        #gameCanvas {
+            display: block;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        #score {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+        #startScreen, #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.7);
+            border-radius: 12px;
+            z-index: 20;
+        }
+        #gameOverScreen {
+            display: none;
+        }
+        .title {
+            color: #fff;
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+        }
+        .subtitle {
+            color: #ddd;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+        .btn {
+            background: linear-gradient(45deg, #f39c12, #e74c3c);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(243, 156, 18, 0.5);
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .final-score {
+            color: #f39c12;
+            font-size: 72px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .color-dots {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        .color-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        #instructions {
+            color: #aaa;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        <div id="score">分数: 0</div>
+        <div class="color-dots" id="colorDots"></div>
+        
+        <div id="startScreen">
+            <div class="title">🎮 WeSeeWe</div>
+            <div class="subtitle">跳跃方块 - 踩对颜色，跳得更高！</div>
+            <button class="btn" onclick="startGame()">开始游戏</button>
+            <div id="instructions">点击或按空格键跳跃（可二段跳）</div>
+        </div>
+        
+        <div id="gameOverScreen">
+            <div class="title">游戏结束</div>
+            <div class="final-score" id="finalScore">0</div>
+            <button class="btn" onclick="restartGame()">再来一次</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
