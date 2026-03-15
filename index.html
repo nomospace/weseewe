@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
-    <title>WeSeeWe - 跳跃方块</title>
+    <title>WeSeeWe - 跳跃方块 v2.0</title>
     <link rel="icon" type="image/x-icon" href="res/favicon.ico"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -31,16 +31,66 @@
             border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
-        #score {
+        
+        /* 顶部信息栏 */
+        .top-bar {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            top: 10px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             z-index: 10;
+            pointer-events: none;
         }
+        
+        .score-section {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        #score {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        #combo {
+            color: #ffd93d;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 5px;
+            min-height: 20px;
+        }
+        
+        #highScore {
+            color: rgba(255,255,255,0.7);
+            font-size: 12px;
+            text-align: right;
+        }
+        
+        /* 音效按钮 */
+        #soundBtn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 15;
+            transition: all 0.2s;
+        }
+        
+        #soundBtn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+        
+        /* 开始/结束屏幕 */
         #startScreen, #gameOverScreen {
             position: absolute;
             top: 0;
@@ -51,93 +101,190 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             border-radius: 12px;
             z-index: 20;
         }
+        
         #gameOverScreen {
             display: none;
         }
+        
         .title {
             color: #fff;
-            font-size: 48px;
+            font-size: 42px;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
         }
+        
         .subtitle {
             color: #ddd;
-            font-size: 18px;
-            margin-bottom: 40px;
+            font-size: 16px;
+            margin-bottom: 30px;
+            text-align: center;
+            padding: 0 20px;
         }
+        
         .btn {
             background: linear-gradient(45deg, #f39c12, #e74c3c);
             color: white;
             border: none;
-            padding: 15px 50px;
-            font-size: 24px;
+            padding: 14px 45px;
+            font-size: 20px;
             font-weight: bold;
             border-radius: 30px;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            margin: 10px;
+            margin: 8px;
         }
+        
         .btn:hover {
             transform: scale(1.05);
             box-shadow: 0 5px 20px rgba(243, 156, 18, 0.5);
         }
+        
         .btn:active {
             transform: scale(0.98);
         }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+        }
+        
         .final-score {
             color: #f39c12;
-            font-size: 72px;
+            font-size: 64px;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 15px 0;
         }
-        .color-dots {
-            position: absolute;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 10;
+        
+        #maxCombo {
+            color: #e74c3c;
+            font-size: 16px;
+            margin-bottom: 20px;
         }
-        .color-dot {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
+        
         #instructions {
             color: #aaa;
-            font-size: 14px;
+            font-size: 13px;
             margin-top: 20px;
+            text-align: center;
+            padding: 0 30px;
+        }
+        
+        /* 平台类型说明 */
+        .legend {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 0 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #ccc;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+        
+        /* 排行榜 */
+        .leaderboard {
+            margin-top: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px 20px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        
+        .leaderboard-title {
+            color: #ffd93d;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            color: #fff;
+            font-size: 12px;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* 难度指示器 */
+        .difficulty {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            z-index: 10;
         }
     </style>
 </head>
 <body>
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
-        <div id="score">分数: 0</div>
-        <div class="color-dots" id="colorDots"></div>
+        
+        <div class="top-bar">
+            <div class="score-section">
+                <div id="score">分数: 0</div>
+                <div id="combo"></div>
+            </div>
+            <div id="highScore">最高分: 0</div>
+        </div>
+        
+        <button id="soundBtn" onclick="toggleSound()">🔊</button>
+        
+        <div id="difficulty" class="difficulty">难度: 简单</div>
         
         <div id="startScreen">
             <div class="title">🎮 WeSeeWe</div>
-            <div class="subtitle">跳跃方块 - 踩对颜色，跳得更高！</div>
+            <div class="subtitle">跳跃方块 v2.0<br>踩对平台，跳得更高！</div>
             <button class="btn" onclick="startGame()">开始游戏</button>
-            <div id="instructions">点击或按空格键跳跃（可二段跳）</div>
+            <div id="instructions">
+                点击屏幕或按空格键跳跃（可二段跳）<br>
+                收集道具获得增益效果！
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background:#2ecc71"></div>安全 +5</div>
+                <div class="legend-item"><div class="legend-color" style="background:#3498db"></div>普通 +1</div>
+                <div class="legend-item"><div class="legend-color" style="background:#f1c40f"></div>奖励 +15</div>
+                <div class="legend-item"><div class="legend-color" style="background:#9b59b6"></div>弹射 🚀</div>
+                <div class="legend-item"><div class="legend-color" style="background:#e74c3c"></div>危险 ⚠️</div>
+            </div>
         </div>
         
         <div id="gameOverScreen">
             <div class="title">游戏结束</div>
             <div class="final-score" id="finalScore">0</div>
+            <div id="maxCombo">最大连击: 0</div>
             <button class="btn" onclick="restartGame()">再来一次</button>
+            <button class="btn btn-secondary" id="reviveBtn" onclick="revive()">🔄 复活 (-20分)</button>
         </div>
     </div>
 
     <script src="game.js"></script>
+    <script>
+        function toggleSound() {
+            const enabled = AudioSystem.toggle();
+            document.getElementById('soundBtn').textContent = enabled ? '🔊' : '🔇';
+        }
+    </script>
 </body>
 </html>
